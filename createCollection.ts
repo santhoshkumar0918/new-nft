@@ -40,7 +40,7 @@ const transcation = await createNft(
     mint: collectionMint,
     name:"My Collection",
     symbol:"MC",
-    uri:"https://...",
+    uri:"https://raw.githubusercontent.com/santhoshkumar0918/new-nft/refs/heads/main/nft-collection/metadata/metadata.json",
     sellerFeeBasisPoints:percentAmount(0),
     isCollection:true
 
