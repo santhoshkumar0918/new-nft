@@ -8,7 +8,7 @@ import {airdropIfRequired, getExplorerLink, getKeypairFromFile} from "@solana-de
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults"
 
 import {clusterApiUrl, Connection,LAMPORTS_PER_SOL} from "@solana/web3.js"
-import { compareAmounts, generateSigner, keypairIdentity, percentAmount } from "@metaplex-foundation/umi";
+import { compareAmounts, generateSigner, keypairIdentity, percentAmount, publicKey } from "@metaplex-foundation/umi";
 import { UnrecognizedArrayLikeSerializerSizeError } from "@metaplex-foundation/umi/serializers";
 
 
@@ -34,3 +34,29 @@ const umiUser = umi.eddsa.createKeypairFromSecretKey(user.secretKey)
 umi.use(keypairIdentity(umiUser))
 
 console.log("created umi instance ")
+
+const collectionAdddress = publicKey("BS4N6nvhppBmgGZ3G91k8vKi8aVumbfWNUD8QTx5JjkX")
+
+console.log("creating Nft")
+
+const mint = generateSigner(umi)
+
+const transcation = await createNft(umi,{
+    mint,
+    name : "NFT",
+    uri : "",
+    sellerFeeBasisPoints : percentAmount(0),
+    collection : {
+        key : collectionAdddress,
+        verified : false,
+    }
+});
+
+await transcation.sendAndConfirm(umi)
+
+const createdNft = await fetchDigitalAsset(umi,mint.publicKey)
+
+console.log(`created Nft ,, Address is ${getExplorerLink("address",
+    createdNft.mint.publicKey,
+    "devnet"
+)}`)
