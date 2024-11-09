@@ -44,7 +44,7 @@ const mint = generateSigner(umi)
 const transcation = await createNft(umi,{
     mint,
     name : "NFT",
-    uri : "",
+    uri : "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg",
     sellerFeeBasisPoints : percentAmount(0),
     collection : {
         key : collectionAdddress,
