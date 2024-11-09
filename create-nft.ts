@@ -1,62 +1,57 @@
 import {
     closeEscrowAccount,
-    createNft,fetchDigitalAsset,mplTokenMetadata
-} from "@metaplex-foundation/mpl-token-metadata"
-
-import {airdropIfRequired, getExplorerLink, getKeypairFromFile} from "@solana-developers/helpers"
-
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults"
-
-import {clusterApiUrl, Connection,LAMPORTS_PER_SOL} from "@solana/web3.js"
+    createNft, fetchDigitalAsset, mplTokenMetadata
+} from "@metaplex-foundation/mpl-token-metadata";
+import { airdropIfRequired, getExplorerLink, getKeypairFromFile } from "@solana-developers/helpers";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { compareAmounts, generateSigner, keypairIdentity, percentAmount, publicKey } from "@metaplex-foundation/umi";
-import { UnrecognizedArrayLikeSerializerSizeError } from "@metaplex-foundation/umi/serializers";
 
-
-
-
-const connection = new Connection(clusterApiUrl("devnet"))
-
-const user =  await getKeypairFromFile();
+const connection = new Connection(clusterApiUrl("devnet"));
+const user = await getKeypairFromFile();
 
 await airdropIfRequired(
     connection,
     user.publicKey,
-    1  * LAMPORTS_PER_SOL,
+    1 * LAMPORTS_PER_SOL,
     0.5 * LAMPORTS_PER_SOL
-)
+);
 
-console.log("Created a user")
+console.log("Created a user");
 
-const umi =  createUmi(connection.rpcEndpoint)
-umi.use(mplTokenMetadata())
+const umi = createUmi(connection.rpcEndpoint);
+umi.use(mplTokenMetadata());
 
-const umiUser = umi.eddsa.createKeypairFromSecretKey(user.secretKey)
-umi.use(keypairIdentity(umiUser))
+const umiUser = umi.eddsa.createKeypairFromSecretKey(user.secretKey);
+umi.use(keypairIdentity(umiUser));
 
-console.log("created umi instance ")
+console.log("Created umi instance");
 
-const collectionAdddress = publicKey("BS4N6nvhppBmgGZ3G91k8vKi8aVumbfWNUD8QTx5JjkX")
+const collectionAddress = publicKey("7p7Z1cTzbt78kvShDQ1ovY1hCikkEyCjy5jTx2FEgn8o");
 
-console.log("creating Nft")
+console.log("Creating NFT");
 
-const mint = generateSigner(umi)
+const mint = generateSigner(umi);
 
-const transcation = await createNft(umi,{
-    mint,
-    name : "NFT",
-    uri : "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg",
-    sellerFeeBasisPoints : percentAmount(0),
-    collection : {
-        key : collectionAdddress,
-        verified : false,
-    }
-});
+try {
+    const transaction = await createNft(umi, {
+        mint,
+        name: "NFT",
+        uri: "https://builtin.com/sites/www.builtin.com/files/2024-10/Blockchain%20Technology%20from%20Builtin.jpg",
+        sellerFeeBasisPoints: percentAmount(0),
+        collection: {
+            key: collectionAddress,
+            verified: false,
+        }
+    });
 
-await transcation.sendAndConfirm(umi)
+    console.log("Sending transaction to create NFT...");
+    const signature = await transaction.sendAndConfirm(umi);
+    console.log("Transaction confirmed with signature:", signature);
 
-const createdNft = await fetchDigitalAsset(umi,mint.publicKey)
-
-console.log(`created Nft ,, Address is ${getExplorerLink("address",
-    createdNft.mint.publicKey,
-    "devnet"
-)}`)
+    // Fetching and verifying created NFT
+    const createdNft = await fetchDigitalAsset(umi, mint.publicKey);
+    console.log(`Created NFT, Address: ${getExplorerLink("address", createdNft.mint.publicKey, "devnet")}`);
+} catch (error) {
+    console.error("Error creating NFT:", error);
+}
